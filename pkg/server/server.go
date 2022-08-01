@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/md5"
+	"encoding/hex"
 	"io/ioutil"
 	"net"
 	"path/filepath"
@@ -162,6 +163,7 @@ func (s *SampleServer) Allocate(ctx context.Context, reqs *pluginapi.AllocateReq
 	for _, req := range reqs.ContainerRequests {
 		log.Infof("received request: %v", strings.Join(req.DevicesIDs, ","))
 		resp := &pluginapi.ContainerAllocateResponse{
+			// 注入 deviceID 到环境变量
 			Envs: map[string]string{
 				"SAMPLE_DEVICES": strings.Join(req.DevicesIDs, ","),
 			},
@@ -240,12 +242,12 @@ func (s *SampleServer) listDevice() error {
 		}
 
 		deviceName := defaultSampleLocation + "/" + f.Name()
-		md5Sum := md5.Sum([]byte(deviceName))
+		md5Sum := getMD5Hash(deviceName)
 		s.devices[deviceName] = &pluginapi.Device{
-			ID:     string(md5Sum[:]),
+			ID:     md5Sum,
 			Health: pluginapi.Healthy,
 		}
-		log.Infof("find device %s", deviceName)
+		log.Infof("find device %s with md5 %s", deviceName, md5Sum)
 	}
 	return nil
 }
@@ -276,12 +278,13 @@ func (s *SampleServer) watchDevice() error {
 
 				// Create事件
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					sum := md5.Sum([]byte(event.Name))
+					sum := getMD5Hash(event.Name)
 					s.devices[event.Name] = &pluginapi.Device{
-						ID:     string(sum[:]),
+						ID:     sum,
 						Health: pluginapi.Healthy,
 					}
 					s.notify <- true
+					log.Infof("device created: %v, md5 %v", event.Name, sum)
 					// Remove事件
 				} else if event.Op&fsnotify.Remove == fsnotify.Remove {
 					delete(s.devices, event.Name)
@@ -306,4 +309,9 @@ func (s *SampleServer) watchDevice() error {
 	<-done
 
 	return nil
+}
+
+func getMD5Hash(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
