@@ -3,16 +3,18 @@ package server
 import (
 	"context"
 	"crypto/md5"
-	"github.com/fsnotify/fsnotify"
-	log "github.com/sirupsen/logrus"
-	"github.com/yaoice/sample-device-plugin/pkg/utils"
-	"google.golang.org/grpc"
 	"io/ioutil"
-	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"
 	"net"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
+	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"
+
+	"github.com/yaoice/sample-device-plugin/pkg/utils"
 )
 
 // SampleServer是一个device plugin实现
@@ -144,6 +146,7 @@ func (s *SampleServer) ListAndWatch(e *pluginapi.Empty, srv pluginapi.DevicePlug
 			srv.Send(&pluginapi.ListAndWatchResponse{
 				Devices: devs,
 			})
+			log.Infoln("update device list done")
 		case <-s.ctx.Done():
 			log.Infoln("ListAndWatch exit")
 			return nil
@@ -236,12 +239,13 @@ func (s *SampleServer) listDevice() error {
 			continue
 		}
 
-		md5Sum := md5.Sum([]byte(f.Name()))
-		s.devices[f.Name()] = &pluginapi.Device{
+		deviceName := defaultSampleLocation + "/" + f.Name()
+		md5Sum := md5.Sum([]byte(deviceName))
+		s.devices[deviceName] = &pluginapi.Device{
 			ID:     string(md5Sum[:]),
 			Health: pluginapi.Healthy,
 		}
-		log.Infof("find device %s", f.Name())
+		log.Infof("find device %s", deviceName)
 	}
 	return nil
 }

@@ -36,6 +36,14 @@ Allocated resources:
 ```
 出现sample.com/sample资源
 
+ListAndWatch 上报资源相关的 kubelet 日志：
+```
+Aug 01 17:32:39 cce-alqjuwli-w6y7xfxs kubelet[6059]: I0801 17:32:39.156561    6059 endpoint.go:112] State pushed for device plugin sample.com/sample
+Aug 01 17:32:47 cce-alqjuwli-w6y7xfxs kubelet[6059]: I0801 17:32:47.945322    6059 setters.go:343] Update capacity for sample.com/sample to 5
+```
+
+从 dp 汇报至 kubelet 到 update apiserver 间隔时间与 `--node-status-update-frequency` 参数有关，默认值是 10s.
+
 ## 测试
 ```
 # cat  build/deploy/sample/pod-use-sample-resource.yaml

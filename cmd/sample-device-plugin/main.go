@@ -1,14 +1,16 @@
 package main
 
 import (
-	"github.com/fsnotify/fsnotify"
-	log "github.com/sirupsen/logrus"
-	"github.com/yaoice/sample-device-plugin/pkg/server"
-	"github.com/yaoice/sample-device-plugin/pkg/utils/ldflags"
-	"k8s.io/component-base/cli/flag"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
+	log "github.com/sirupsen/logrus"
+	"k8s.io/component-base/cli/flag"
+
+	"github.com/yaoice/sample-device-plugin/pkg/server"
+	"github.com/yaoice/sample-device-plugin/pkg/utils/ldflags"
 )
 
 func main() {

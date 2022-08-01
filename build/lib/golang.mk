@@ -20,10 +20,10 @@
 
 GO_IMAGE := golang:1.15.5
 GO := go
-GO_SUPPORTED_VERSIONS ?= 1.13|1.14|1.15
+GO_SUPPORTED_VERSIONS ?= 1.13|1.14|1.15|1.16|1.17|1.18
 GO_LDFLAGS += -X $(VERSION_PACKAGE).GIT_COMMIT=$(GIT_COMMIT) \
 	-X $(VERSION_PACKAGE).GO_VERSION=$(shell go version | awk '{print $$3}') \
-	-X $(VERSION_PACKAGE).BUILD_TIME=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') 
+	-X $(VERSION_PACKAGE).BUILD_TIME=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
 _DOCKER_RUN_EXTRA_ARGS :=
 
